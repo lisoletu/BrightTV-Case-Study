@@ -112,7 +112,7 @@ GROUP BY Province;
 ---Final table after processing
 ----------------------------------------------------------------------------------
  WITH user_profiles AS (
-    SELECT UserID,
+SELECT UserID,
 
     CASE 
         WHEN Province=' ' THEN 'Uncategorized'
@@ -153,8 +153,7 @@ GROUP BY Province;
     END AS Gender
 
 FROM user_profiles
- );
-
+),
 viewership AS (
     SELECT
     COALESCE(UserID0,userid4) AS userid,
@@ -185,7 +184,7 @@ viewership AS (
         WHEN watch_time BETWEEN '17:00:00' AND '23:59:59' THEN '04. Evening'
     END AS time_of_day,
 
-    DATE_FORMAT(Duration 2, 'HH:mm:ss') AS duration,
+    DATE_FORMAT(`Duration 2`, 'HH:mm:ss') AS duration,
     CASE 
         WHEN duration BETWEEN '00:05:00' AND '00:30:00' THEN '01. Low Usage: <30 min'
         WHEN duration BETWEEN '00:30:01' AND '00:59:59' THEN '02. Med Usage: <60 min'
@@ -195,7 +194,7 @@ viewership AS (
 
     HOUR(RecordDate2) AS hour_of_day
 
-FROM workspace.default.bright_tv_viewership
+FROM viewership
 )
 SELECT Coalesce(A.userid,B.userid) AS sub_id,
        month_id,
