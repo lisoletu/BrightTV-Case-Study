@@ -1,23 +1,16 @@
 -- Databricks notebook source
--------------------------------------------------------------------------
----Telling Databricks to use the "brighttv" catalog and "analytics" schema
--------------------------------------------------------------------------
 
+---Telling Databricks to use the "brighttv" catalog and "analytics" schema---
 USE brighttv.analytics;
 
--------------------------------------------------------
 ---Running the full tables---
--------------------------------------------------------
-
 SELECT*
 FROM user_profiles;
 
 SELECT *
 FROM viewership;
 
--------------------------------------------------
----GENDER CHECKS
---------------------------------------------------
+---GENDER CHECKS---
 SELECT DISTINCT Gender
 FROM user_profiles;
 
