@@ -219,3 +219,4 @@ FROM viewership AS A
 LEFT JOIN user_profiles AS B
 ON A.userid=B.userid;
 
+
