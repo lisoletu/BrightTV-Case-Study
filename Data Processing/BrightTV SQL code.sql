@@ -1,5 +1,4 @@
 -- Databricks notebook source
-
 ---Telling Databricks to use the "brighttv" catalog and "analytics" schema---
 -----------------------------------------------------------------------------
 USE brighttv.analytics;
@@ -109,8 +108,8 @@ GROUP BY Province;
  WHERE age IS NULL;
 
 
----Final table after processing
-----------------------------------------------------------------------------------
+---Final code to join User Profriles and Viewership and creating the final clean table (dataset) for analysis
+--------------------------------------------------------------------------------------------------------------
  WITH user_profiles AS (
 SELECT UserID,
 
