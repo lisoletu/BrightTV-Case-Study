@@ -1,9 +1,10 @@
 -- Databricks notebook source
+-----------------------------------------------------------------------
 ---Telling Databricks to use the "brighttv" catalog and "analytics" schema---
 -----------------------------------------------------------------------------
 USE brighttv.analytics;
 
-
+--------------------------------------------------------------------------
 ---Running the full tables before analysis to see what I have in my data
 --------------------------------------------------------------------------
 SELECT*
@@ -15,9 +16,9 @@ FROM viewership
 LIMIT 10;
 
 
-
+------------------------------------------------------
 -- Checking for Duplicates
----------------------------------------
+------------------------------------------------------
 SELECT UserID, 
        COUNT(*) AS duplicate_count
 FROM user_profiles
@@ -25,7 +26,7 @@ GROUP BY UserID
 HAVING COUNT(*) > 1;
 
 
-
+-------------------------------------------------
 -- Checking the size of the data
 --------------------------------------------------
 SELECT COUNT(*) AS number_of_rows,
@@ -33,7 +34,7 @@ SELECT COUNT(*) AS number_of_rows,
 FROM user_profiles;
 
 
-
+-----------------------------------------------------------
 -- Checking if there is any rows where UserID is NULL
 --------------------------------------------------------- 
 SELECT COUNT(*) AS cnt
@@ -44,7 +45,7 @@ SELECT DISTINCT UserID
 FROM user_profiles;
 
 
-
+---------------------------------------------------------
 ---Gender Checks
 --------------------------------------------------------
 SELECT DISTINCT Gender
@@ -60,7 +61,7 @@ SELECT
 FROM user_profiles
 GROUP BY Gender;
 
-
+-------------------------------------------------------------
 ----Race Checks
 ------------------------------------------------------------------
 SELECT COUNT(*) AS num_rows
@@ -80,7 +81,7 @@ SELECT COUNT(DISTINCT UserID)  AS subs,
 FROM user_profiles
 GROUP BY Race;
 
-
+----------------------------------------------------------
 --Province checks
 ---------------------------------------------------------
 SELECT DISTINCT Province
@@ -96,7 +97,7 @@ FROM user_profiles
 GROUP BY Province;
 
 
-
+---------------------------------------------------------
 --Age Checks
 ---------------------------------------------------------
  SELECT MIN(Age) AS min_age, --- = 0
@@ -107,7 +108,7 @@ GROUP BY Province;
  FROM user_profileS
  WHERE age IS NULL;
 
-
+------------------------------------------------------------------
 ---Final code to join User Profriles and Viewership and creating the final clean table (dataset) for analysis
 --------------------------------------------------------------------------------------------------------------
  WITH user_profiles AS (
