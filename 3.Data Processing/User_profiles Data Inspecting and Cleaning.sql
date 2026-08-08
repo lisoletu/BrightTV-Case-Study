@@ -1,8 +1,7 @@
 -- Databricks notebook source
-
 -- This is to check what my data looks like.
 SELECT *
-FROM brighttv.analytics.user_profiles
+FROM user_profiles
 LIMIT 10;
 --------------------------------------------
 -- Checking for Duplicates
@@ -13,24 +12,45 @@ FROM brighttv.analytics.user_profiles
 GROUP BY userid
 HAVING COUNT(*)>1;
 
-----------------------------------------------------------
----EMAIL CHECKS
-----------------------------------------------------------
-SELECT DISTINCT Email
+----------------------------------------------------------------------------------------------------------------
+---PROVINCE CHECKS--Inspecting the Province column and replacing blanks, None, Other and Null with Uncategorized
+-----------------------------------------------------------------------------------------------------------------
+SELECT DISTINCT Province
+FROM user_profiles;
+
+SELECT DISTINCT
+    CASE 
+        WHEN Province=' ' THEN 'Uncategorized'
+        WHEN Province='None' THEN 'Uncategorized'
+        WHEN Province = 'other' THEN 'Uncategorized'
+        WHEN Province IS NULL THEN 'Uncategorized'
+    ELSE Province
+    END AS Regions
+FROM brighttv.analytics.user_profiles;
+------------------------------------------------------------------
+---AGE CHECKS--Inspecting the Age column and creating age groups
+------------------------------------------------------------------
+SELECT DISTINCT MIN(Age) AS min_age, -- 0  (to find age of the youngest person)
+                MAX(Age) AS max_age, -- 114  (to find age of the oldest person)
+                AVG (Age) AS mean_age-- 27.696  (to find average age between upper bound and lower bound)
+FROM user_profiles;
+
+SELECT 
+   CASE
+        WHEN age = 0 THEN 'Infant'
+        WHEN age BETWEEN 1 AND 12 THEN 'Kid'
+        WHEN age BETWEEN 13 AND 17 THEN 'Youth'
+        WHEN age BETWEEN 18 AND 35 THEN 'Young Adult'
+        WHEN age BETWEEN 36 AND 50 THEN 'Adult'
+        WHEN age BETWEEN 51 AND 60 THEN 'Elder'
+        WHEN age >60 THEN 'Pensioner'
+        ELSE 'Unknown'
+    END AS age_groups
 FROM brighttv.analytics.user_profiles;
 
-SELECT DISTINCT UserID, Email,
-    CASE
-        WHEN Email IS NOT NULL 
-            OR Email <>' ' 
-            OR Email NOT IN ('None') THEN 1
-        ELSE 0
-        END AS email_flag
-FROM brighttv.analytics.user_profiles;
-
-----------------------------------------------------------
----GENDER CHECKS
-----------------------------------------------------------
+-----------------------------------------------------------------------------------------------
+---GENDER CHECKS---checking the gender column and replacing blanks, None and Null with unknown
+-----------------------------------------------------------------------------------------------
 SELECT DISTINCT Gender
 FROM user_profiles;
 
@@ -42,11 +62,12 @@ SELECT DISTINCT
     ELSE Gender -- if gender is male or female turn it as it is
     END AS Sex --new column name
 FROM brighttv.analytics.user_profiles;
------------------------------------------------------------------
------RACE CHECKS
------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------
+-----RACE CHECKS-----checking the race column and replacing Other, None, Null and blanks with unknown
+------------------------------------------------------------------------------------------------------
 SELECT DISTINCT Race
-FROM brighttv.analytics.user_profiles;
+FROM user_profiles;
 
 SELECT COUNT (DISTINCT UserID) AS Subs,
     CASE
@@ -56,109 +77,94 @@ SELECT COUNT (DISTINCT UserID) AS Subs,
         WHEN Race IS NULL THEN 'Unknown'-----Replaces null with unknown
     ELSE Race --keep it as it is
    END AS ethnicity -- new column name
-   FROM brighttv.analytics.user_profiles
+   FROM user_profiles
 GROUP BY ethnicity;
 
-------------------------------------------------------------------
----AGE CHECKS
-------------------------------------------------------------------
-SELECT DISTINCT MIN(Age) AS min_age, -- 0  (to find age of the youngest person)
-                MAX(Age) AS max_age, -- 114  (to find age of the oldest person)
-                AVG (Age) AS mean_age-- 27.696  (to find average age between upper bound and lower bound)
-FROM brighttv.analytics.user_profiles;
+----------------------------------------------------------------------------------------------------------------------
+---EMAIL CHECKS---checking the number of users who have emails (return 1 if email is there and 0 if there is no email)
+----------------------------------------------------------------------------------------------------------------------
+SELECT DISTINCT Email
+FROM user_profiles;
 
-SELECT 
+SELECT DISTINCT UserID, Email,
     CASE
-         WHEN Age = 0 THEN 'Infant'
-        WHEN Age BETWEEN 1 AND 12 THEN 'Kids'
-        WHEN Age BETWEEN 13 AND 17 THEN 'Youth'
-        WHEN Age BETWEEN 18 AND 35 THEN 'Young Adult'
-        WHEN Age BETWEEN 36 AND 50 THEN 'Adults'
-        WHEN Age > 50 AND AGE<=60 THEN 'Elder' --Another way of doing a BETWEEN statement using operations
-        WHEN Age > 60 THEN 'Pensioner'
-    END AS Age_group
+        WHEN Email IS NULL
+            OR Email = ' '
+            OR Email = 'None'
+        THEN 0
+        ELSE 1
+    END AS email_flag
 FROM brighttv.analytics.user_profiles;
 
-
----------------------------------------------------------------------
----PROVINCE CHECKS
---------------------------------------------------------------------
-SELECT DISTINCT Province
-FROM brighttv.analytics.user_profiles;
-
-SELECT DISTINCT
-CASE
-        WHEN Province ='None' THEN 'Unknown'
-        WHEN Province =' ' THEN 'Unknown'
-        WHEN Province IS NULL THEN 'Unknown'
-    ELSE Province
-    END AS Region
-FROM brighttv.analytics.user_profiles;
-
----------------------------------------------------------------------
----SOCIAL MEDIA HANDLE CHECKS
---------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------
+---SOCIAL MEDIA HANDLE CHECKS----Counting the number of users who have social media handles (return 1 if  Social Media Handle is there and 0 if not there)
+----------------------------------------------------------------------------------------------------------------------
 SELECT DISTINCT UserID, `Social Media Handle`
-FROM brighttv.analytics.user_profiles;
+FROM user_profiles;
 
 SELECT DISTINCT UserID, `Social Media Handle`,
- CASE
+    CASE
         WHEN `Social Media Handle` IS NOT NULL 
-        AND `Social Media Handle`<>' ' 
-        AND  `Social Media Handle` <> 'None'
-    THEN 1
+            OR `Social Media Handle`<> '' 
+            OR  `Social Media Handle` NOT IN ('None')THEN 1
     ELSE 0
-    END AS sm_flag
+    END AS socialmedia_flag
 FROM brighttv.analytics.user_profiles;
 
 
 ----------------------------------------------------------------------
 ---Creating clean user_profiles table using TEMPORARY TABLES
 ----------------------------------------------------------------------
-CREATE OR REPLACE TEMPORARY TABLE user_profiles AS (
-
+CREATE OR REPLACE TEMPORARY TABLE user_profiles AS 
+(
     SELECT UserID,
+   CASE 
+        WHEN Gender = 'None' THEN 'unknown' 
+        WHEN Gender = ' ' THEN 'unknown' 
+        WHEN Gender IS NULL THEN 'unknown' 
+    ELSE Gender 
+    END AS Sex,
+
+   CASE
+        WHEN Race = 'None' THEN 'unknown' 
+        WHEN Race = ' ' THEN 'unknown' 
+        WHEN Race = 'other' THEN 'unknown' 
+        WHEN Race IS NULL THEN 'unknown' 
+    ELSE Race 
+    END AS Ethnicity,
+
+    CASE
+        WHEN age = 0 THEN 'Infants'
+        WHEN age BETWEEN 1 AND 12 THEN 'Kids'
+        WHEN age BETWEEN 13 AND 19 THEN 'Teenager'
+        WHEN age BETWEEN 20 AND 35 THEN 'Youth'
+        WHEN age BETWEEN 36 AND 50 THEN 'Adult'
+        WHEN age BETWEEN 51 AND 65 THEN 'Elder'
+        WHEN age >65 THEN 'Pensioner'
+    END AS age_groups,
 
     CASE 
         WHEN Province=' ' THEN 'Uncategorized'
         WHEN Province='None' THEN 'Uncategorized'
-        WHEN Province ='other' THEN 'Uncategorized'
+        WHEN Province = 'other' THEN 'Uncategorized'
         WHEN Province IS NULL THEN 'Uncategorized'
     ELSE Province
     END AS Region,
 
-    age,
     CASE
-        WHEN age = 0 THEN 'Infants:0'
-        WHEN age BETWEEN 1 AND 12 THEN 'Kids:1-12'
-        WHEN age BETWEEN 13 AND 19 THEN 'Teenager:13-19'
-        WHEN age BETWEEN 20 AND 35 THEN 'Youth:20-35'
-        WHEN age BETWEEN 36 AND 50 THEN 'Adult:36-50'
-        WHEN age BETWEEN 51 AND 65 THEN 'Elder:51-65'
-        WHEN age >65 THEN 'Pensioner:>65'
-    END AS age_groups,
-
-    CASE
-        WHEN (email IS NOT NULL )OR (email=' ') OR  (email NOT IN ('None'))THEN 1
-    ELSE 0
+        WHEN Email IS NULL
+            OR Email = ' '
+            OR Email = 'None'
+        THEN 0
+    ELSE 1
     END AS email_flag,
 
     CASE
-        WHEN `Social Media Handle` IS NOT NULL OR `Social Media Handle`=' ' OR  `Social Media Handle` NOT IN ('None')THEN 1
-        ELSE 0
-    END AS sm_flag,
-
-    CASE
-        WHEN Race='other' THEN 'None'
-        WHEN Race=' ' THEN 'None'
-    ELSE Race
-    END AS Race,
-
-    CASE
-        WHEN gender =' ' THEN 'None'
-        ELSE gender
-    END AS Gender
-
+        WHEN `Social Media Handle` IS NOT NULL 
+            OR `Social Media Handle`<> '' 
+            OR  `Social Media Handle` NOT IN ('None')THEN 1
+    ELSE 0
+    END AS socialmedia_flag
 FROM brighttv.analytics.user_profiles
 );
 
@@ -167,4 +173,5 @@ FROM brighttv.analytics.user_profiles
 ------------------------------------------------------------------------------------
 SELECT *
 FROM user_profiles;
+
 
