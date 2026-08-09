@@ -113,9 +113,9 @@ FROM brighttv.analytics.user_profiles;
 
 
 ----------------------------------------------------------------------
----Creating clean user_profiles table using TEMPORARY TABLES
+---Creating 'cleaned_user_profiles' TEMPORARY table
 ----------------------------------------------------------------------
-CREATE OR REPLACE TEMPORARY TABLE user_profiles AS 
+CREATE OR REPLACE TEMPORARY TABLE cleaned_user_profiles AS 
 (
     SELECT UserID,
    CASE 
@@ -171,7 +171,12 @@ FROM brighttv.analytics.user_profiles
 ---------------------------------------------------------------------------------
 ---to see what is on my TEMP table
 ------------------------------------------------------------------------------------
+
+SELECT COUNT(*) AS total_records ---5375
+FROM cleaned_user_profiles;
+
+
 SELECT *
-FROM user_profiles;
+FROM cleaned_user_profiles;
 
 
