@@ -30,7 +30,7 @@ The case study aimed to answer the following key questions:
 
 The project followed an end-to-end data analytics workflow:
 
-**Data Cleaning & Transformation → Exploratory Data Analysis → Dashboard Development → Insights → Business Recommendations**
+**Planning → Data Cleaning & Transformation → Exploratory Data Analysis → Dashboard Development → Insights → Business Recommendations**
 
 SQL was used in Databricks to clean and transform the data, including handling missing values, standardising demographic fields, converting timestamps from UTC to South African time, and creating analytical variables.
 
