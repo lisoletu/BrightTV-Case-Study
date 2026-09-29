@@ -53,7 +53,7 @@ The analysis translated BrightTV's user and viewing data into **actionable busin
 
 ## Repository Contents
 
-This repository contains the SQL analysis, project documentation, dashboards, and final presentation developed as part of the BrightTV case study.
+This repository contains the Raw dataset, Project Requirement document, Project Planning and Timeline document, SQL analysis, Excel file, dashboards, and final presentation developed as part of the BrightTV case study.
 
 ---
 
