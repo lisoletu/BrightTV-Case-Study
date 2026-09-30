@@ -4,6 +4,77 @@ SELECT *
 FROM brighttv.analytics.viewership
 LIMIT 10;
 
+-- Checking the total number of raw viewership records
+SELECT COUNT(*) AS total_records
+FROM brighttv.analytics.viewership;--10 000
+
+-- Checking unique users in the raw viewership data
+SELECT
+    COUNT(DISTINCT UserID0) AS unique_userid0,
+    COUNT(DISTINCT UserID4) AS unique_userid4
+FROM brighttv.analytics.viewership;
+
+-- Checking missing user IDs in the raw viewership data
+SELECT
+    SUM(CASE WHEN UserID0 IS NULL THEN 1 ELSE 0 END) AS missing_userid0,
+    SUM(CASE WHEN UserID4 IS NULL THEN 1 ELSE 0 END) AS missing_userid4
+FROM brighttv.analytics.viewership;
+
+-- Checking for duplicate viewership records
+SELECT
+    UserID0,
+    UserID4,
+    RecordDate2,
+    Channel2,
+    `Duration 2`,
+    COUNT(*) AS duplicate_count
+FROM brighttv.analytics.viewership
+GROUP BY
+    UserID0,
+    UserID4,
+    RecordDate2,
+    Channel2,
+    `Duration 2`
+HAVING COUNT(*) > 1
+ORDER BY duplicate_count DESC;
+
+-- Checking the completeness of the two user ID columns
+SELECT
+    COUNT(*) AS total_records,
+
+    SUM(
+        CASE
+            WHEN UserID0 IS NOT NULL AND UserID4 IS NOT NULL
+                THEN 1
+            ELSE 0
+        END
+    ) AS both_userids_present,
+
+    SUM(
+        CASE
+            WHEN UserID0 IS NOT NULL AND UserID4 IS NULL
+                THEN 1
+            ELSE 0
+        END
+    ) AS userid0_only,
+
+    SUM(
+        CASE
+            WHEN UserID0 IS NULL AND UserID4 IS NOT NULL
+                THEN 1
+            ELSE 0
+        END
+    ) AS userid4_only,
+
+    SUM(
+        CASE
+            WHEN UserID0 IS NULL AND UserID4 IS NULL
+                THEN 1
+            ELSE 0
+        END
+    ) AS both_missing
+
+FROM brighttv.analytics.viewership;
 
 --Applying DATE FUNCTIONS to extracting watch time in YY-MM-DD format from 'RecordDate2' column (timestamp) into Date
 SELECT  RecordDate2,
